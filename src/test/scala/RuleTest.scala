@@ -1,5 +1,5 @@
 import org.bulatnig.ruler.api.Transaction
-import org.bulatnig.ruler.dsl.TransactionAdapter
+import org.bulatnig.ruler.dsl.{TransactionAdapter, TransactionAdapterFactory}
 import org.scalatest.FunSuite
 
 import scala.reflect.runtime.currentMirror
@@ -71,5 +71,35 @@ class RuleTest extends FunSuite {
     val func = toolbox.eval(q"$functionSymbol.apply _").asInstanceOf[Transaction => TransactionAdapter]
     val result = func(tx)
     println(result)
+  }
+
+  test("quasiquotes") {
+    val txModel = new Transaction
+    txModel.data("amount1") = 1
+    txModel.data("amount2") = 2
+
+    val properties = List(
+      ValDef(Modifiers(), TermName("amount1"), Select(Ident(TermName("scala")), TypeName("Int")),
+        TypeApply(Select(Apply(Select(Ident(TermName("tx")), TermName("data")), List(Literal(Constant("amount1")))), TermName("asInstanceOf")),
+          List(Select(Ident(TermName("scala")), TypeName("Int"))))),
+      q"val ${TermName("amount2")}: Int = tx.data(${Constant("amount2")}).asInstanceOf[Int]"
+    )
+
+    val adapterClass =
+      q"""class TransactionAdapterImpl(tx: org.bulatnig.ruler.api.Transaction)
+         extends org.bulatnig.ruler.dsl.TransactionAdapter(tx) { ..$properties }"""
+    val adapterSymbol = toolbox.define(adapterClass.asInstanceOf[toolbox.u.ImplDef])
+    val txAdapterFactory = toolbox.eval(
+      q"""new org.bulatnig.ruler.dsl.TransactionAdapterFactory {
+            def wrap(tx: org.bulatnig.ruler.api.Transaction): org.bulatnig.ruler.dsl.TransactionAdapter =
+                return new $adapterSymbol(tx)
+          }""").asInstanceOf[TransactionAdapterFactory]
+
+    val rule = toolbox.parse("tx.amount1 + tx.amount2")
+    val ruleEvaluator = toolbox.eval(q"(tx: $adapterSymbol) => $rule").asInstanceOf[TransactionAdapter => Int]
+
+    val tx = txAdapterFactory.wrap(txModel)
+    val result = ruleEvaluator(tx)
+    assert(result == 3)
   }
 }
