@@ -7,7 +7,7 @@ import scala.reflect.runtime.universe._
 import scala.tools.reflect.ToolBox
 
 
-class RuleTest extends FunSuite {
+class ScalaTest extends FunSuite {
   private val toolbox = currentMirror.mkToolBox()
 
   test("compile and run code at runtime") {
