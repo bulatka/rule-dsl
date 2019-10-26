@@ -1,4 +1,4 @@
-package org.bulatnig.ruler.api
+package org.bulatnig.v1.api
 
 import scala.collection.mutable
 

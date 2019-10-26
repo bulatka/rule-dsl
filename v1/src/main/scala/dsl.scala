@@ -1,6 +1,6 @@
-package org.bulatnig.ruler.dsl
+package org.bulatnig.v1.dsl
 
-import org.bulatnig.ruler.api.Transaction
+import org.bulatnig.v1.api.Transaction
 
 abstract class TransactionAdapter(protected val tx: Transaction) {
 

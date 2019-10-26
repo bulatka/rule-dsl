@@ -1,5 +1,5 @@
-import org.bulatnig.ruler.api.Transaction
-import org.bulatnig.ruler.dsl.{TransactionAdapter, TransactionAdapterFactory}
+import org.bulatnig.v1.api.Transaction
+import org.bulatnig.v1.dsl.{TransactionAdapter, TransactionAdapterFactory}
 import org.scalatest.FunSuite
 
 import scala.reflect.runtime.currentMirror
@@ -38,7 +38,7 @@ class ScalaTest extends FunSuite {
 //      def amount2(default: Int): Int = tx.data.getOrElse("amount2", default).asInstanceOf[Int]
 //    }
 
-    val function = """def apply(tx: org.bulatnig.ruler.api.Transaction) = new org.bulatnig.ruler.dsl.TransactionAdapter(tx) {
+    val function = """def apply(tx: org.bulatnig.v1.api.Transaction) = new org.bulatnig.v1.dsl.TransactionAdapter(tx) {
                      |  val ref_text: String = tx.data("ref_text").asInstanceOf[String]
                      |  val amount: Int = tx.data("amount").asInstanceOf[Int]
                      |}""".stripMargin
@@ -66,7 +66,7 @@ class ScalaTest extends FunSuite {
           List(Select(Ident(TermName("scala")), TypeName("Int")))))
     )
 
-    val functionWrapper = q"object FunctionWrapper { def apply(tx: org.bulatnig.ruler.api.Transaction) = new org.bulatnig.ruler.dsl.TransactionAdapter(tx) { ..$properties } }"
+    val functionWrapper = q"object FunctionWrapper { def apply(tx: org.bulatnig.v1.api.Transaction) = new org.bulatnig.v1.dsl.TransactionAdapter(tx) { ..$properties } }"
     val functionSymbol = toolbox.define(functionWrapper.asInstanceOf[toolbox.u.ImplDef])
     val func = toolbox.eval(q"$functionSymbol.apply _").asInstanceOf[Transaction => TransactionAdapter]
     val result = func(tx)
@@ -86,12 +86,12 @@ class ScalaTest extends FunSuite {
     )
 
     val adapterClass =
-      q"""class TransactionAdapterImpl(tx: org.bulatnig.ruler.api.Transaction)
-         extends org.bulatnig.ruler.dsl.TransactionAdapter(tx) { ..$properties }"""
+      q"""class TransactionAdapterImpl(tx: org.bulatnig.v1.api.Transaction)
+         extends org.bulatnig.v1.dsl.TransactionAdapter(tx) { ..$properties }"""
     val adapterSymbol = toolbox.define(adapterClass.asInstanceOf[toolbox.u.ImplDef])
     val txAdapterFactory = toolbox.eval(
-      q"""new org.bulatnig.ruler.dsl.TransactionAdapterFactory {
-            def wrap(tx: org.bulatnig.ruler.api.Transaction): org.bulatnig.ruler.dsl.TransactionAdapter =
+      q"""new org.bulatnig.v1.dsl.TransactionAdapterFactory {
+            def wrap(tx: org.bulatnig.v1.api.Transaction): org.bulatnig.v1.dsl.TransactionAdapter =
                 return new $adapterSymbol(tx)
           }""").asInstanceOf[TransactionAdapterFactory]
 
