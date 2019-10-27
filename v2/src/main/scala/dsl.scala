@@ -1,6 +1,6 @@
 package org.bulatnig.v2.dsl
 
-import org.bulatnig.v2.model.{Format, Transaction}
+import org.bulatnig.v2.model.{Field, Format, Transaction}
 
 import scala.reflect.runtime.currentMirror
 import scala.reflect.runtime.universe._
@@ -22,7 +22,10 @@ class RuleEvaluator(format: Format, rule: String) {
 
   val (adapter, evaluator) = {
     val properties = format.fields.map(field => {
-      val scalaType = Select(Ident(TermName("scala")), TypeName(field.`type`.toString()))
+      val scalaType = field.`type` match {
+        case Field.Type.int => Select(Ident(TermName("scala")), TypeName("Int"))
+        case Field.Type.string => Select(Ident(TermName("Predef")), TypeName("String"))
+      }
       q"val ${TermName(field.name)}: $scalaType = tx.data(${Constant(field.name)}).asInstanceOf[$scalaType]"
     })
     val toolbox = currentMirror.mkToolBox()
