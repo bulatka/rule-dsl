@@ -2,18 +2,6 @@ ThisBuild / organization := "org.bulatnig.ruler"
 ThisBuild / version := "1.0"
 ThisBuild / scalaVersion := "2.12.10"
 
-lazy val v1 = (project in file("v1"))
-  .settings(
-    commonSettings,
-    libraryDependencies ++= commonDependencies
-  )
-
-lazy val v2 = (project in file("v2"))
-  .settings(
-    commonSettings,
-    libraryDependencies ++= commonDependencies
-  )
-
 lazy val commonDependencies = Seq(
   "org.scala-lang" % "scala-compiler" % "2.12.10",
   "org.typelevel" %% "cats-core" % "2.0.0",
@@ -26,3 +14,21 @@ lazy val commonSettings = Seq(
     Resolver.sonatypeRepo("releases")
   )
 )
+
+lazy val v1 = (project in file("v1"))
+  .settings(
+    commonSettings,
+    libraryDependencies ++= commonDependencies
+  )
+
+lazy val v2 = (project in file("v2"))
+  .settings(
+    commonSettings,
+    libraryDependencies ++= commonDependencies
+  )
+
+lazy val v3 = (project in file("v3"))
+  .settings(
+    commonSettings,
+    libraryDependencies ++= commonDependencies
+  )
